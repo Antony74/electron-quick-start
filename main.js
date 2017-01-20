@@ -7,23 +7,38 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
+// Hopefully the last parameter in our command line was a url?
+var sUrl = process.argv[process.argv.length - 1];
+
+var parsedUrl = url.parse(sUrl);
+if (!parsedUrl.protocol || !parsedUrl.host) {
+	// No, this isn't a url
+	console.log("usage:   npm start <url>\n");
+	console.log("example: npm start https://www.gnu.org/graphics/heckert_gnu.svg\n");
+	process.exit(0);
+}
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({
+	width: 800,
+	height: 600,
+	frame: false,
+	transparent: true,
+	webPreferences: {
+		nodeIntegration: false
+	}
+  });
 
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  mainWindow.loadURL(sUrl)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+//  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
