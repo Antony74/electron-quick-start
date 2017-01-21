@@ -12,10 +12,10 @@ var sUrl = process.argv[process.argv.length - 1];
 
 var parsedUrl = url.parse(sUrl);
 if (!parsedUrl.protocol || !parsedUrl.host) {
-	// No, this isn't a url
-	console.log("usage:   npm start <url>\n");
-	console.log("example: npm start https://www.gnu.org/graphics/heckert_gnu.svg\n");
-	process.exit(0);
+    // No, this isn't a url
+    console.log("usage:   npm start <url>\n");
+    console.log("example: npm start https://www.gnu.org/graphics/heckert_gnu.svg\n");
+    process.exit(0);
 }
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -25,17 +25,35 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-	width: 800,
-	height: 600,
-	frame: false,
-	transparent: true,
-	webPreferences: {
-		nodeIntegration: false
-	}
+    width: 800,
+    height: 600,
+    frame: false,
+    transparent: true,
+    webPreferences: {
+        nodeIntegration: false
+    }
   });
 
-  // and load the index.html of the app.
+  // Load the url
   mainWindow.loadURL(sUrl)
+
+  // Sometimes (especially when displaying svg) the system needs this
+  // little bit of a prod before the dragging works
+  mainWindow.minimize();
+
+  mainWindow.once('focus', function() {
+        mainWindow.restore();
+  });
+
+  // Make the whole window draggable apart from a few tags (mostly guesswork I'm afraid),
+  // and do it on a timer so the whole window stays draggable.
+  setInterval(function() {
+        mainWindow.webContents.insertCSS(
+            'html,body,svg'
+          + '{ -webkit-app-region: drag }'
+          + 'a,button,canvas'
+          + '{-webkit-app-region: no-drag}')
+  }, 1000);
 
   // Open the DevTools.
 //  mainWindow.webContents.openDevTools()
